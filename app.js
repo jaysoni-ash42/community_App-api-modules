@@ -5,8 +5,10 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var mongoose=require('mongoose');
 const bodyParser = require("body-parser")
+var cors=require('cors');
 
 var postRouter = require('./routes/post');
+var userRouter = require('./routes/user');
 
 var app = express();
 
@@ -34,8 +36,10 @@ app.use((req, res, next) => {
   }
   next();
 });
+app.use(cors());
 
 app.use('/', postRouter);
+app.use('/',userRouter);
 
 mongoose.connect("mongodb://127.0.0.1:27017/react_app", {useNewUrlParser: true,useUnifiedTopology: true}).then((db)=>{
   console.log("database started");

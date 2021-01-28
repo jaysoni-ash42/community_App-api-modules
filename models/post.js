@@ -3,7 +3,10 @@ var schema=mongoose.Schema;
 
 var CommentSchema=new schema(
     {
-    
+        userid:{
+            type:String,
+            required:true
+        },
         text:{
             type:String,
             required:true
@@ -11,7 +14,12 @@ var CommentSchema=new schema(
         username:{
             type:String,
             required:true
+        },
+        userimg:{
+            type:String,
+            required:true
         }
+
     },
         {
             timestamps:true

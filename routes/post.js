@@ -5,7 +5,8 @@ const bodyparser=require("body-parser");
 router.use(bodyparser.json());
 
 /* GET home page. */
-router.get('/post',(req, res, next) => {
+// get all the post with the current post posted
+router.route('/post').get((req, res, next) => {
     Post.find({}).sort({ createdAt :-1,updatedAt:-1}).then((post)=>{
         res.setHeader("Content-Type",'application/json');
         res.statusCode=200;
@@ -14,7 +15,8 @@ router.get('/post',(req, res, next) => {
         res.status(404);
         res.end("not able to fetch");
     })
-}).post('/post',(req,res,next)=>{
+    //Add a post
+}).post((req,res,next)=>{
     console.log(req.body);
     Post.create(req.body).then((post)=>{
         res.setHeader("Content-Type",'application/json');
@@ -25,7 +27,8 @@ router.get('/post',(req, res, next) => {
         res.end(err.message);
     })
 });
-router.post("/post/:postId/comments",(req,res,next)=>{
+//post a comment
+router.route("/post/:postId/comments").post((req,res,next)=>{
     async function postcomment()
     {
         try{
@@ -47,7 +50,8 @@ router.post("/post/:postId/comments",(req,res,next)=>{
     }
     postcomment();
 
-}).get("/post/:postId/comments",(req,res,next)=>{
+    // get all the comment of a particular post
+}).get((req,res,next)=>{
     async function getcomment()
     {
         try{
@@ -68,7 +72,39 @@ router.post("/post/:postId/comments",(req,res,next)=>{
     }
     getcomment();
 
-})
+});
+//delete a comment in a post
+router.delete("/post/:postId/comments/:commentId",(req,res,next)=>{
+    Post.findById(req.params.postId).then((post)=>{
+        if(post)
+        {
+            for (i=0;i<post.comments.length;i++)
+            {
+                if(post.comments[i]._id==req.params.commentId)
+                {
+                    post.comments[i].remove();
+                    post.save().then((post)=>{
+                    res.setHeader("Content-Type",'application/json');
+                        res.statusCode=200;
+                        res.json(post);
+
+                    }).catch((err)=>{
+                        res.statusCode=404;
+                        res.end(err.message);
+
+    });
+                }
+            }
+        }
+
+    }).catch((err)=>{
+        res.statusCode=404;
+        res.end(err.message);
+
+    });
+
+});
+//get all the post of a user to display in the grid
 router.get("/post/:userId",(req,res,next)=>{
     Post.find({userid:`${req.params.userId}`}).then((post)=>{
         if(post!=null)
@@ -87,19 +123,8 @@ router.get("/post/:userId",(req,res,next)=>{
         
     })
 
-}).delete("/post/:userId",(req,res,next)=>{
-    Post.remove({userid:`${req.params.userId}`}).then((post)=>{
-                    res.setHeader("Content-Type",'application/json');
-                    res.statusCode=200;
-                        res.json(post);
-
-                }).catch((err)=>{
-                    res.setHeader("Content-Type",'application/json');
-                    res.statusCode=404;
-                    res.end(new Error("no post found"));
-                })
-
 });
+//---Add a like in a post by a particular user
 router.post("/post/:postId/like",(req,res,next)=>{
     async function postlike()
     {
@@ -121,8 +146,6 @@ router.post("/post/:postId/like",(req,res,next)=>{
 
     }
     postlike();
-
-
 });
 
 
